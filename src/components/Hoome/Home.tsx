@@ -41,15 +41,16 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
     }
 
     const weather = (data: string) => {
-
+        // Alert.alert("function call.");
         axios.get(`http://api.weatherstack.com/current?access_key=d68383d3cb470ad44cbee15ef6a94864&query=${data}`)
-            .then(function (response) {
+            .then((response) => {
                 console.log(response?.data, "weather api response");
                 setcapitaldetail(response?.data)
                 setModalVisible(true)
             })
-            .catch(function (error) {
+            .catch( (error) => {
                 console.log(error, "weather api error");
+                Alert.alert("api error." , JSON.stringify(error));
                 setModalVisible(false)
             });
     }
@@ -62,7 +63,7 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                 </Text>
                 <TextInput placeholder='Enter your country' onChangeText={(value) => {
                     setcityname(value);
-                    if (value.length >= 0) {
+                    if (value.length > 0) {
                         setshowlogic(false)
                     } else {
                         setshowlogic(true)
@@ -100,9 +101,9 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                         </View>
                         :
                         <View style={styles.list}>
-                            {citydetails && citydetails.map((item) => {
+                            {citydetails && citydetails.map((item : any , index : number) => {
                                 return (
-                                    <View style={styles.card}>
+                                    <View style={styles.card} key={index}>
                                         <View style={styles.subview}>
                                             <Image source={{ uri: `${item.flags.png}` }} style={styles.image} />
                                         </View>
@@ -116,7 +117,7 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                                                     title="Country Weather"
                                                     accessibilityLabel="decrement"
                                                     onPress={() => {
-                                                        weather(item.capital)
+                                                        weather(item.capital[0])
                                                     }}
                                                     color="red"
                                                 />
@@ -223,11 +224,6 @@ const styles = StyleSheet.create({
         shadowRadius: 4,
         elevation: 5,
         flexDirection: 'row',
-    },
-    button: {
-        borderRadius: 20,
-        padding: 10,
-        elevation: 2
     },
     buttonOpen: {
         backgroundColor: "#F194FF",
