@@ -77,7 +77,7 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                     <Button
                         title="Random Astroid"
                         accessibilityLabel="decrement"
-                        onPress={RandomAstroid}
+                        onPress={() => { RandomAstroid()}}
                         color="red"
                     />
                 </View>
