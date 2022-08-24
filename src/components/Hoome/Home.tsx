@@ -1,8 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect , useState }  from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Alert, Image, Dimensions, Modal, Pressable } from 'react-native';
 import axios from "axios";
+import { useNavigation } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('screen');
+
+
 
 export type Props = {
     city: string;
@@ -13,47 +16,36 @@ export type Props = {
 
 const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
 
-    const [cityname, setcityname] = React.useState(city)
-    const [ListshouldRender, setListshouldRender] = React.useState(ListRender)
-    const [citydetails, setcitydetails] = React.useState([])
-    const [modalVisible, setModalVisible] = React.useState(modal);
-    const [capitaldetail, setcapitaldetail] = React.useState(capital)
-    const [showlogic, setshowlogic] = React.useState(false)
+    const [astroidid, setastroidid] = useState(city)
+    const [showlogic, setshowlogic] = useState(false)
+    const [asteroiddetails , setasteroiddetails] = useState({})
 
-
-    console.log(capitaldetail, ">>>>>>>>>")
-
-    
-
-    const submitbutton = () => {
-        axios.get(`https://restcountries.com/v3.1/name/${cityname}`)
+    const submitbutton = (data : any) => {
+        axios.get(`https://api.nasa.gov/neo/rest/v1/neo/${data}?api_key=BOGCU1F4Qm8pYhyWdVJscsT0PC8RnbyEc9gr2RuL`)
             .then(function (response) {
-                if (response.status === 404) {
-                    setListshouldRender(false)
-                } else if (response.status === 200) {
-                    setListshouldRender(true)
-                    setcitydetails(response?.data)
-                }
+                console.log(response.data , "??????????") 
+                setasteroiddetails(response.data)
             })
             .catch(function (error) {
                 console.log(error, "weather api error");
             });
     }
 
-    const weather = (data: string) => {
+    const RandomAstroid = (data: string) => {
         // Alert.alert("function call.");
-        axios.get(`http://api.weatherstack.com/current?access_key=d68383d3cb470ad44cbee15ef6a94864&query=${data}`)
+        axios.get(`https://api.nasa.gov/neo/rest/v1/neo/browse?api_key=DEMO_KEY`)
             .then((response) => {
-                console.log(response?.data, "weather api response");
-                setcapitaldetail(response?.data)
-                setModalVisible(true)
+                var astro = response?.data?.near_earth_objects
+                var randAst = astro[Math.floor(Math.random() * astro.length)];
+                console.log(randAst?.id , "api astroid response")
+                submitbutton(randAst?.id)
             })
             .catch( (error) => {
-                console.log(error, "weather api error");
-                Alert.alert("api error." , JSON.stringify(error));
-                setModalVisible(false)
+                console.log(error, "asteroid error");
             });
     }
+
+    const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
@@ -61,8 +53,8 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                 <Text style={styles.greeting}>
                     Welcome to Weather App
                 </Text>
-                <TextInput placeholder='Enter your country' onChangeText={(value) => {
-                    setcityname(value);
+                <TextInput placeholder='Enter Astroid iD' onChangeText={(value) => {
+                    setastroidid(value);
                     if (value.length > 0) {
                         setshowlogic(false)
                     } else {
@@ -74,95 +66,29 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                         disabled={showlogic}
                         title="Submit"
                         accessibilityLabel="decrement"
-                        onPress={submitbutton}
+                        onPress={() => { 
+                            submitbutton(astroidid)
+                        }}
                         color="red"
                     />
                 </View>
-            </View>
-            
-            {ListshouldRender ?
-                <>
-                    {modalVisible ?
-                        <View style={styles.modalView}>
-                            <View style={styles.subview}>
-                                <Image source={{ uri: `${capitaldetail?.current?.weather_icons[0]}` }} style={styles.image} />
-                            </View>
-                            <View style={styles.subview}>
-                                <Text style={styles.modalText}>temperature  {capitaldetail?.current?.temperature} </Text>
-                                <Text style={styles.modalText}>wind_speed {capitaldetail?.current?.wind_speed}</Text>
-                                <Text style={styles.modalText}>precipitation {capitaldetail?.current?.precip}</Text>
-                                <Pressable
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => setModalVisible(!modalVisible)}
-                                >
-                                    <Text style={styles.textStyle}>Back</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                        :
-                        <View style={styles.list}>
-                            {citydetails && citydetails.map((item : any , index : number) => {
-                                return (
-                                    <View style={styles.card} key={index}>
-                                        <View style={styles.subview}>
-                                            <Image source={{ uri: `${item.flags.png}` }} style={styles.image} />
-                                        </View>
-                                        <View style={styles.subview}>
-                                            <Text >capital {item.capital} </Text>
-                                            <Text>population {item.population}</Text>
-                                            <Text>flag  </Text>
-                                            <Text>Lat , Long {item.latlng[0]} {item.latlng[1]} </Text>
-                                            <View style={styles.button}>
-                                                <Button
-                                                    title="Country Weather"
-                                                    accessibilityLabel="decrement"
-                                                    onPress={() => {
-                                                        weather(item.capital[0])
-                                                    }}
-                                                    color="red"
-                                                />
-                                            </View>
-                                        </View>
-                                    </View>
-                                )
-                            })}
-                        </View>
-                    }
-                </>
-                :
-                <View >
-                    <Text style={styles.greeting}> Search Details</Text>
+
+                <View style={{ marginTop: 10}}>
+                    <Button
+                        title="Random Astroid"
+                        accessibilityLabel="decrement"
+                        onPress={RandomAstroid}
+                        color="red"
+                    />
                 </View>
-            }
-            {/* <View style={styles.centeredView}>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={modalVisible}
-                    onRequestClose={() => {
-                        setModalVisible(!modalVisible);
-                    }}
-                >
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <View style={styles.subview}>
-                                <Image source={{ uri: `${capitaldetail?.current?.weather_icons[0]}` }} style={styles.image} />
-                            </View>
-                            <View style={styles.subview}>
-                                <Text style={styles.modalText}>temperature  {capitaldetail?.current?.temperature} </Text>
-                                <Text style={styles.modalText}>wind_speed {capitaldetail?.current?.wind_speed}</Text>
-                                <Text style={styles.modalText}>precipitation {capitaldetail?.current?.precip}</Text>
-                                <Pressable
-                                    style={[styles.button, styles.buttonClose]}
-                                    onPress={() => setModalVisible(!modalVisible)}
-                                >
-                                    <Text style={styles.textStyle}>Hide Modal</Text>
-                                </Pressable>
-                            </View>
-                        </View>
-                    </View>
-                </Modal>
-            </View> */}
+                {asteroiddetails ? 
+                <View style={{backgroundColor: 'pink' , marginTop: 20 , height : height/5 , justifyContent:'space-evenly'}}>
+                    <Text>name : - {asteroiddetails?.name}</Text>
+                    <Text>url : - {asteroiddetails?.nasa_jpl_url}</Text>
+                    <Text>is_potentially_hazardous_asteroid : - {asteroiddetails?.is_potentially_hazardous_asteroid == true ? "true" : "false"}</Text>
+                </View>
+                : null }
+            </View>
         </View>
     );
 };
