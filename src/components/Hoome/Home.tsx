@@ -1,11 +1,8 @@
 import React, { useEffect , useState }  from 'react';
 import { Button, StyleSheet, Text, View, TextInput, Alert, Image, Dimensions, Modal, Pressable } from 'react-native';
 import axios from "axios";
-import { useNavigation } from '@react-navigation/native';
 
 const { height, width } = Dimensions.get('screen');
-
-
 
 export type Props = {
     city: string;
@@ -14,7 +11,7 @@ export type Props = {
     capital: any;
 };
 
-const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
+const Hello: React.FC<Props> = ({ city, ListRender, capital, modal , navigation }) => {
 
     const [astroidid, setastroidid] = useState(city)
     const [showlogic, setshowlogic] = useState(false)
@@ -25,6 +22,7 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
             .then(function (response) {
                 console.log(response.data , "??????????") 
                 setasteroiddetails(response.data)
+                navigation.navigate("Asteroiddetails" , response.data )
             })
             .catch(function (error) {
                 console.log(error, "weather api error");
@@ -45,7 +43,6 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
             });
     }
 
-    const navigation = useNavigation();
 
     return (
         <View style={styles.container}>
@@ -81,13 +78,6 @@ const Hello: React.FC<Props> = ({ city, ListRender, capital, modal }) => {
                         color="red"
                     />
                 </View>
-                {asteroiddetails ? 
-                <View style={{backgroundColor: 'pink' , marginTop: 20 , height : height/5 , justifyContent:'space-evenly'}}>
-                    <Text>name : - {asteroiddetails?.name}</Text>
-                    <Text>url : - {asteroiddetails?.nasa_jpl_url}</Text>
-                    <Text>is_potentially_hazardous_asteroid : - {asteroiddetails?.is_potentially_hazardous_asteroid == true ? "true" : "false"}</Text>
-                </View>
-                : null }
             </View>
         </View>
     );
