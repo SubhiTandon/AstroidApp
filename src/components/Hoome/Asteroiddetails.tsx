@@ -9,7 +9,6 @@ type Props = {
 
 const Asteroiddetails = (props: Props) => {
 
-  // console.log(props?.route?.params , " details")
 
   const [countrydetails, setcountrydetails] = useState()
 
